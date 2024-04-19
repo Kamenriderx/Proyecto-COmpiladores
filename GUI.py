@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import ply.lex as lex
 import ply.yacc as yacc
+import random
 
 tokens = [
     'NUMBER',
@@ -16,7 +17,7 @@ def t_NUMBER(t):
     return t
 
 def t_BASE(t):
-    r'Hexadecimal|Octal|Binario|Romano'
+    r'Hexadecimal|Octal|Binario|Romano|Aleatoreo'
     return t
 
 # Ignorar espacios y tabulaciones
@@ -48,6 +49,10 @@ def p_conversion(p):
 
 
 def convert(number, base):
+    if base == 'Aleatoreo':
+        bases = ['Hexadecimal','Octal','Binario','Romano']
+        base = bases[random.randint(0, 100)%4]
+          
     if base == 'Hexadecimal':
         return hex(number)
     elif base == 'Octal':
@@ -55,8 +60,18 @@ def convert(number, base):
     elif base == 'Binario':
         return bin(number)
     elif base == 'Romano':
-        return "Conversion to Roman"
-    
+            roman_numerals = [
+                (1000, "M"), (900, "CM"), (500, "D"), (400, "CD"),
+                (100, "C"), (90, "XC"), (50, "L"), (40, "XL"),
+                (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")
+            ]
+            roman = ''
+            for value, symbol in roman_numerals:
+                while number >= value:
+                    roman += symbol
+                    number -= value
+            return roman
+            
 
 
 
