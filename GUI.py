@@ -17,7 +17,7 @@ def t_NUMBER(t):
     return t
 
 def t_BASE(t):
-    r'Hexadecimal|Octal|Binario|Romano|Aleatoreo'
+    r'Hexadecimal|Octal|Binario|Romano|Aleatoreo|Base3'
     return t
 
 # Ignorar espacios y tabulaciones
@@ -71,6 +71,19 @@ def convert(number, base):
                     roman += symbol
                     number -= value
             return roman
+    elif base == "Base3":
+            if number == 0:
+                return "0"  
+
+            result = ""
+            n = abs(number)
+
+            while n > 0:
+                remainder = n % 3
+                result = str(remainder) + result
+                n //= 3
+            return result
+
             
 
 
@@ -87,9 +100,9 @@ class Ui_lexer(object):
         self.pushButton.setIcon(icon)
         self.pushButton.setObjectName("pushButton")
         self.pushButton.clicked.connect(self.analyze)
-        self.listWidget1 = QtWidgets.QListWidget(lexer)
-        self.listWidget1.setGeometry(QtCore.QRect(450, 250, 251, 251))
-        self.listWidget1.setObjectName("listWidget1")
+        self.syntaxAnalyzer = QtWidgets.QListWidget(lexer)
+        self.syntaxAnalyzer.setGeometry(QtCore.QRect(450, 250, 251, 251))
+        self.syntaxAnalyzer.setObjectName("listWidget1")
         self.pushButton_2 = QtWidgets.QPushButton(lexer)
         self.pushButton_2.setGeometry(QtCore.QRect(600, 90, 101, 51))
         icon1 = QtGui.QIcon()
@@ -103,29 +116,29 @@ class Ui_lexer(object):
         self.pushButton_3.setIcon(icon2)
         self.pushButton_3.setObjectName("pushButton_3")
         self.pushButton_3.clicked.connect(self.openFileDialog)
-        self.listWidget = QtWidgets.QListWidget(lexer)
-        self.listWidget.setGeometry(QtCore.QRect(10, 10, 571, 211))
-        self.listWidget.setObjectName("listWidget")
-        self.tableWidget = QtWidgets.QTableWidget(lexer)
-        self.tableWidget.setGeometry(QtCore.QRect(10, 250, 450, 251))
-        self.tableWidget.setMinimumSize(QtCore.QSize(411, 0))
-        self.tableWidget.setMaximumSize(QtCore.QSize(411, 16777215))
-        self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(4)
-        self.tableWidget.setRowCount(0)
+        self.documentContent = QtWidgets.QListWidget(lexer)
+        self.documentContent.setGeometry(QtCore.QRect(10, 10, 571, 211))
+        self.documentContent.setObjectName("listWidget")
+        self.lexicalAnalysis = QtWidgets.QTableWidget(lexer)
+        self.lexicalAnalysis.setGeometry(QtCore.QRect(10, 250, 450, 251))
+        self.lexicalAnalysis.setMinimumSize(QtCore.QSize(411, 0))
+        self.lexicalAnalysis.setMaximumSize(QtCore.QSize(411, 16777215))
+        self.lexicalAnalysis.setObjectName("tableWidget")
+        self.lexicalAnalysis.setColumnCount(4)
+        self.lexicalAnalysis.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(0, item)
+        self.lexicalAnalysis.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(1, item)
+        self.lexicalAnalysis.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(2, item)
+        self.lexicalAnalysis.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(3, item)
+        self.lexicalAnalysis.setHorizontalHeaderItem(3, item)
 
         self.retranslateUi(lexer)
         QtCore.QMetaObject.connectSlotsByName(lexer)
     def analyze(self):
-        self.tableWidget.setRowCount(0)  
+        self.lexicalAnalysis.setRowCount(0)  
         
         # Construir el lexer
         lexer = lex.lex()
@@ -139,16 +152,16 @@ class Ui_lexer(object):
         row = 0
 
         for token in lexer:
-            self.tableWidget.insertRow(row)
-            self.tableWidget.setItem(row, 0, QtWidgets.QTableWidgetItem(token.type))
-            self.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(str(token.value)))
-            self.tableWidget.setItem(row, 2, QtWidgets.QTableWidgetItem(str(token.lineno)))
-            self.tableWidget.setItem(row, 3, QtWidgets.QTableWidgetItem(str(token.lexpos)))
+            self.lexicalAnalysis.insertRow(row)
+            self.lexicalAnalysis.setItem(row, 0, QtWidgets.QTableWidgetItem(token.type))
+            self.lexicalAnalysis.setItem(row, 1, QtWidgets.QTableWidgetItem(str(token.value)))
+            self.lexicalAnalysis.setItem(row, 2, QtWidgets.QTableWidgetItem(str(token.lineno)))
+            self.lexicalAnalysis.setItem(row, 3, QtWidgets.QTableWidgetItem(str(token.lexpos)))
             row += 1
         parser.parse(self.input_string)
 
         for result in results:
-            self.listWidget1.addItem(result)
+            self.syntaxAnalyzer.addItem(result)
 
     def openFileDialog(self):
         options = QtWidgets.QFileDialog.Options()
@@ -167,7 +180,7 @@ class Ui_lexer(object):
                     self.input_string = doc.read()
                 lines = self.input_string.split('\n')
                 for line in lines:
-                        self.listWidget.addItem(line)
+                        self.documentContent.addItem(line)
             except FileNotFoundError:
                 print(f"El archivo '{selected_file}' no se encontró.")
 
@@ -180,13 +193,13 @@ class Ui_lexer(object):
         self.pushButton.setText(_translate("lexer", "Analizar"))
         self.pushButton_2.setText(_translate("lexer", "Generar arbol"))
         self.pushButton_3.setText(_translate("lexer", "Cargar archivo"))
-        item = self.tableWidget.horizontalHeaderItem(0)
+        item = self.lexicalAnalysis.horizontalHeaderItem(0)
         item.setText(_translate("lexer", "Tipo"))
-        item = self.tableWidget.horizontalHeaderItem(1)
+        item = self.lexicalAnalysis.horizontalHeaderItem(1)
         item.setText(_translate("lexer", "Valor"))
-        item = self.tableWidget.horizontalHeaderItem(2)
+        item = self.lexicalAnalysis.horizontalHeaderItem(2)
         item.setText(_translate("lexer", "Linea"))
-        item = self.tableWidget.horizontalHeaderItem(3)
+        item = self.lexicalAnalysis.horizontalHeaderItem(3)
         item.setText(_translate("lexer", "Posicion"))
 
 

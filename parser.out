@@ -1,0 +1,74 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> conversions
+Rule 1     conversions -> conversion
+Rule 2     conversions -> conversions conversion
+Rule 3     conversion -> NUMBER BASE
+
+Terminals, with rules where they appear
+
+BASE                 : 3
+NUMBER               : 3
+error                : 
+
+Nonterminals, with rules where they appear
+
+conversion           : 1 2
+conversions          : 2 0
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . conversions
+    (1) conversions -> . conversion
+    (2) conversions -> . conversions conversion
+    (3) conversion -> . NUMBER BASE
+
+    NUMBER          shift and go to state 3
+
+    conversions                    shift and go to state 1
+    conversion                     shift and go to state 2
+
+state 1
+
+    (0) S' -> conversions .
+    (2) conversions -> conversions . conversion
+    (3) conversion -> . NUMBER BASE
+
+    NUMBER          shift and go to state 3
+
+    conversion                     shift and go to state 4
+
+state 2
+
+    (1) conversions -> conversion .
+
+    NUMBER          reduce using rule 1 (conversions -> conversion .)
+    $end            reduce using rule 1 (conversions -> conversion .)
+
+
+state 3
+
+    (3) conversion -> NUMBER . BASE
+
+    BASE            shift and go to state 5
+
+
+state 4
+
+    (2) conversions -> conversions conversion .
+
+    NUMBER          reduce using rule 2 (conversions -> conversions conversion .)
+    $end            reduce using rule 2 (conversions -> conversions conversion .)
+
+
+state 5
+
+    (3) conversion -> NUMBER BASE .
+
+    NUMBER          reduce using rule 3 (conversion -> NUMBER BASE .)
+    $end            reduce using rule 3 (conversion -> NUMBER BASE .)
+
