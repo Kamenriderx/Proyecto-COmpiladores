@@ -11,6 +11,7 @@ tokens = [
 results = [] 
 
 # Reglas léxicas
+#una regla de token en PLY (Python Lex-Yacc) utilizada para identificar y manejar tokens que representan números en un análisis léxico
 def t_NUMBER(t):
     r'[0-9]+'
     t.value = int(t.value)  # Convertir a entero
@@ -24,10 +25,12 @@ def t_BASE(t):
 t_ignore = ' \t\n'
 
 # Error léxico
+#Esta función se define como un manejador para errores léxicos. En PLY, los prefijos t_ se utilizan para designar funciones relacionadas con tokens.
 def t_error(t):
     print(f"Error léxico: Carácter inesperado '{t.value[0]}'")
     t.lexer.skip(1)
 
+## La producción gramatical conversions : conversion | conversions conversion indica que una secuencia de conversion puede ser una única conversion o múltiples conversiones concatenadas.
 def p_conversions(p):
     '''
     conversions : conversion
@@ -35,10 +38,12 @@ def p_conversions(p):
     '''
     pass
 
+# callback utilizado en un parser generado por PLY (Python Lex-Yacc) para procesar la producción gramatical definida por la regla conversion : NUMBER BASE
 def p_conversion(p):
     '''
     conversion : NUMBER BASE
     '''
+    print(p)
     number = p[1]
     base = p[2]
     original_base = "Decimal"  # Base original es decimal por defecto
@@ -50,7 +55,7 @@ def p_conversion(p):
 
 def convert(number, base):
     if base == 'Aleatoreo':
-        bases = ['Hexadecimal','Octal','Binario','Romano']
+        bases = ['Hexadecimal','Octal','Binario','Romano','Base3']
         base = bases[random.randint(0, 100)%4]
           
     if base == 'Hexadecimal':
@@ -137,9 +142,14 @@ class Ui_lexer(object):
 
         self.retranslateUi(lexer)
         QtCore.QMetaObject.connectSlotsByName(lexer)
+     #se utiliza para realizar un análisis léxico y sintáctico de una cadena de entrada utilizando PLY (Python Lex-Yacc)
     def analyze(self):
-        self.lexicalAnalysis.setRowCount(0)  
-        
+
+        self.lexicalAnalysis.clear()  
+        self.syntaxAnalyzer.clear()
+        headers = ["Tipo", "Valor", "Linea","Posicion"]
+        self.lexicalAnalysis.setHorizontalHeaderLabels(headers)
+ 
         # Construir el lexer
         lexer = lex.lex()
 
@@ -155,23 +165,26 @@ class Ui_lexer(object):
             self.lexicalAnalysis.insertRow(row)
             self.lexicalAnalysis.setItem(row, 0, QtWidgets.QTableWidgetItem(token.type))
             self.lexicalAnalysis.setItem(row, 1, QtWidgets.QTableWidgetItem(str(token.value)))
-            self.lexicalAnalysis.setItem(row, 2, QtWidgets.QTableWidgetItem(str(token.lineno)))
+            #token.lineno
+            self.lexicalAnalysis.setItem(row, 2, QtWidgets.QTableWidgetItem(str(row + 1 )))
             self.lexicalAnalysis.setItem(row, 3, QtWidgets.QTableWidgetItem(str(token.lexpos)))
             row += 1
+        # iniciar el proceso de análisis sintáctico utilizando un parser generado por PLY
         parser.parse(self.input_string)
 
         for result in results:
             self.syntaxAnalyzer.addItem(result)
-
+        results.clear()
     def openFileDialog(self):
+        self.input_string =""
+        self.documentContent.clear()
         options = QtWidgets.QFileDialog.Options()
-        options |= QtWidgets.QFileDialog.DontUseNativeDialog  # Opcional: Evitar el uso del diálogo nativo del sistema
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog  
 
         file_dialog = QtWidgets.QFileDialog()
         file_dialog.setOptions(options)
         file_dialog.setNameFilter("Archivos de Texto (*.txt)")
         file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-        lineString= ""
 
         if file_dialog.exec_():
             selected_file = file_dialog.selectedFiles()[0]

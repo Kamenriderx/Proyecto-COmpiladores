@@ -1,5 +1,1 @@
-22 Hexadecimal 
-33 Octal
-33 Romano
-33 Aleatoreo
-20 Base3
+Binario 33 
